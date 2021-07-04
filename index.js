@@ -1,11 +1,17 @@
 const readLine = require('readline-sync')
 
-function start() {
+const robots = {
+    text: require('./robots/text')
+} 
+
+async function start() {
     // Objeto que guarda o conteúdo da pesquisa.
     const content = {}
 
     content.searchTerm = askAndReturnSearchTerm()
     content.prefix = askAndReturnPrefix()
+
+    await robots.text(content)
 
     // Pergunta o termo da pesquisa.
     function askAndReturnSearchTerm() {
