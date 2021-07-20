@@ -23,6 +23,7 @@
   "homepage": "https://github.com/fallsantos/video-maker#readme",
   "dependencies": {
     "algorithmia": "^0.3.10",
+    "ibm-watson": "^6.1.1",
     "readline-sync": "^1.4.10",
     "sbd": "^1.0.19"
   }

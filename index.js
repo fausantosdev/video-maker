@@ -6,7 +6,9 @@ const robots = {
 
 async function start() {
     // Objeto que guarda o conteúdo da pesquisa.
-    const content = {}
+    const content = {
+        maximumSentences: 7
+    }
 
     content.searchTerm = askAndReturnSearchTerm()
     content.prefix = askAndReturnPrefix()
@@ -27,7 +29,7 @@ async function start() {
         return selectedPrefixText
     } 
 
-    console.log(content)
+    console.log(JSON.stringify(content))
 }
 
 start()
