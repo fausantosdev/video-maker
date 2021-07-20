@@ -1,7 +1,20 @@
 const algorithmia = require('algorithmia')
 const sentenceBoundaryDetection = require('sbd')
 
+const NaturalLanguageUnderstandingV1 = require('ibm-watson/natural-language-understanding/v1');
+const { IamAuthenticator } = require('ibm-watson/auth');
+
 const algorithmiaApiKey = require('../credentials/algorithmia.json').apiKey
+const { apikey: watsonApiKey, url: watsonServiceUrl } = require('../credentials/watson-nlu.json')
+
+// Autenticação
+const nlu = new NaturalLanguageUnderstandingV1({
+    version: '2021-03-25',
+    authenticator: new IamAuthenticator({
+      apikey: watsonApiKey,
+    }),
+    serviceUrl: watsonServiceUrl,
+})
 
 async function robot(content) {
     // (1º) - Baixa conteúdo do wikipedia.
@@ -12,6 +25,10 @@ async function robot(content) {
 
     // (3º) - Quebra em sentenças.
     breakContentIntoSentences(content)
+
+    limitMaximumSentences(content)
+
+    await fetchKeywordsOfAllSentences(content)
 
     // (1º)
     async function fetchContentFromWikipedia (content) {
@@ -68,6 +85,38 @@ async function robot(content) {
                 images: []
             })
         });
+    }
+
+    function limitMaximumSentences(content){
+        content.sentences = content.sentences.slice(0, content.maximumSentences)
+    }
+
+    async function fetchKeywordsOfAllSentences(content){
+        for(const sentence of content.sentences){
+           sentence.keywords = await fetchWatsonAndReturnKeywords(sentence.text)
+        }
+    }
+
+    async function fetchWatsonAndReturnKeywords (sentence) {
+        return new Promise((resolve, reject) => {
+            nlu.analyze({
+                'text': sentence,
+                'features': {
+                  'keywords': {}
+                }
+            })
+            .then(analysisResults => {
+                const keywords = analysisResults.result.keywords.map((keyword) => {
+                    return keyword.text
+                })
+
+                resolve(keywords)
+            })
+            .catch(err => {
+                reject(err)
+                return
+            })
+        })
     }
 }
 
