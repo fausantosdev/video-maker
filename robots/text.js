@@ -7,6 +7,8 @@ const { IamAuthenticator } = require('ibm-watson/auth');
 const algorithmiaApiKey = require('../credentials/algorithmia.json').apiKey
 const { apikey: watsonApiKey, url: watsonServiceUrl } = require('../credentials/watson-nlu.json')
 
+const state = require('./state')
+
 // Autenticação
 const nlu = new NaturalLanguageUnderstandingV1({
     version: '2021-03-25',
@@ -16,7 +18,9 @@ const nlu = new NaturalLanguageUnderstandingV1({
     serviceUrl: watsonServiceUrl,
 })
 
-async function robot(content) {
+async function robot() {
+    const content = state.load()
+
     // (1º) - Baixa conteúdo do wikipedia.
     await fetchContentFromWikipedia(content)
 
@@ -29,6 +33,8 @@ async function robot(content) {
     limitMaximumSentences(content)
 
     await fetchKeywordsOfAllSentences(content)
+
+    state.save(content)
 
     // (1º)
     async function fetchContentFromWikipedia (content) {
